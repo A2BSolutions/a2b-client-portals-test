@@ -1,0 +1,791 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="a2b-test-build" content="true">
+<meta name="a2b-client-type" content="dfy-linkedin">
+<title>Fit Set Go - 90-Day Strategy Dashboard</title>
+<style>
+  :root {
+    --bg:#F6F2F4; --surface:#FFFFFF; --ink:#221419; --muted:#61505A; --faint:#8B7A83;
+    --line:#E4D6DD; --accent:#8A2E5C; --accent-ink:#FFFFFF; --accent-soft:#F3E2EB;
+    --amber:#A96E15; --amber-soft:#F4EBDB; --green:#2E7D4F; --green-soft:#E2EFE7;
+    --shadow:0 1px 2px rgba(34,20,25,.05),0 6px 22px rgba(34,20,25,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:#170D12; --surface:#211219; --ink:#EEE6EA; --muted:#B3A0AA; --faint:#84707B;
+      --line:#3A2430; --accent:#E28BB4; --accent-ink:#2A0D1C; --accent-soft:#331825;
+      --amber:#D99A3D; --amber-soft:#2E2718; --green:#5CB884; --green-soft:#1B2E22;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 22px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#F6F2F4; --surface:#FFFFFF; --ink:#221419; --muted:#61505A; --faint:#8B7A83;
+    --line:#E4D6DD; --accent:#8A2E5C; --accent-ink:#FFFFFF; --accent-soft:#F3E2EB;
+    --amber:#A96E15; --amber-soft:#F4EBDB; --green:#2E7D4F; --green-soft:#E2EFE7;
+    --shadow:0 1px 2px rgba(34,20,25,.05),0 6px 22px rgba(34,20,25,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg:#170D12; --surface:#211219; --ink:#EEE6EA; --muted:#B3A0AA; --faint:#84707B;
+    --line:#3A2430; --accent:#E28BB4; --accent-ink:#2A0D1C; --accent-soft:#331825;
+    --amber:#D99A3D; --amber-soft:#2E2718; --green:#5CB884; --green-soft:#1B2E22;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 22px rgba(0,0,0,.3);
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+  body {
+    margin:0; background:var(--bg); color:var(--ink); line-height:1.55;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif { font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif; }
+  .testbar { background:#6E2547; color:#F8DFEB; font-size:12px; padding:9px 16px; text-align:center; }
+  .testbar b { letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; }
+  .wrap { max-width:900px; margin:0 auto; padding:0 20px 72px; }
+
+  header.top {
+    padding:34px 0 18px; display:flex; flex-wrap:wrap; gap:16px;
+    align-items:flex-end; justify-content:space-between;
+  }
+  .brandline { font-size:12px; font-weight:600; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin:0 0 8px; }
+  header.top h1 { font-size:clamp(24px,4.5vw,32px); margin:0; font-weight:600; letter-spacing:-.01em; }
+  header.top .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+  .confirm-box { text-align:right; }
+  .btn {
+    display:inline-flex; align-items:center; gap:8px; font:inherit; font-size:14.5px; font-weight:600;
+    background:var(--accent); color:var(--accent-ink); border:none; border-radius:9px;
+    padding:11px 20px; cursor:pointer; transition:filter .12s ease;
+  }
+  .btn:hover { filter:brightness(1.08); }
+  .btn[disabled] { background:var(--green-soft); color:var(--green); cursor:default; filter:none; }
+  .btn:focus-visible, .chk:focus-visible, nav a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+  .confirm-note { font-size:11.5px; color:var(--faint); margin-top:6px; }
+
+  nav.sections {
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    display:flex; gap:2px; overflow-x:auto; padding:10px 0;
+    border-bottom:1px solid var(--line); margin-bottom:28px;
+  }
+  nav.sections a {
+    font-size:13px; font-weight:600; color:var(--muted); text-decoration:none;
+    padding:7px 13px; border-radius:999px; white-space:nowrap;
+  }
+  nav.sections a:hover { color:var(--accent); background:var(--accent-soft); }
+
+  section { margin-bottom:40px; scroll-margin-top:64px; }
+  h2 {
+    font-size:13px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--faint); margin:0 0 16px; display:flex; align-items:center; gap:12px;
+  }
+  h2::after { content:""; flex:1; height:1px; background:var(--line); }
+
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .tile {
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:16px 16px 14px; box-shadow:var(--shadow);
+  }
+  .tile .v {
+    font-size:24px; font-weight:700; letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums; line-height:1.15;
+  }
+  .tile .l { font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+  .card {
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:18px; box-shadow:var(--shadow);
+  }
+  .card h3 { font-size:15px; margin:0 0 6px; font-weight:650; }
+  .card p { font-size:13.5px; color:var(--muted); margin:0; }
+  .card .tag {
+    display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--accent); background:var(--accent-soft); border-radius:999px; padding:3px 9px; margin-bottom:10px;
+  }
+  .card .tag.amber { color:var(--amber); background:var(--amber-soft); }
+  a.card { display:flex; flex-direction:column; cursor:pointer; transition:transform .12s ease, border-color .12s ease, box-shadow .12s ease; text-decoration:none; }
+  a.card h3, a.card:visited h3 { color:var(--ink); }
+  a.card p { flex:1; }
+  a.card:hover { transform:translateY(-2px); border-color:var(--accent); box-shadow:0 6px 26px rgba(34,20,25,.14); }
+  a.card:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+  .open-cue {
+    display:inline-flex; align-items:center; gap:7px; margin-top:14px; align-self:flex-start;
+    font-size:13.5px; font-weight:700; color:var(--accent-ink); background:var(--accent);
+    border-radius:9px; padding:9px 16px;
+  }
+  a.card:hover .open-cue { filter:brightness(1.08); }
+
+  table { width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
+  .tbl-wrap { overflow-x:auto; border-radius:12px; }
+  th, td { text-align:left; padding:12px 16px; font-size:14px; border-bottom:1px solid var(--line); }
+  th { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); font-weight:700; }
+  tr:last-child td { border-bottom:none; }
+  td.num { font-variant-numeric:tabular-nums; font-weight:600; }
+  td .small { display:block; font-size:12px; color:var(--muted); font-weight:400; margin-top:2px; }
+
+  .phase { display:flex; gap:16px; margin-bottom:4px; }
+  .phase .rail { display:flex; flex-direction:column; align-items:center; }
+  .phase .dot { width:12px; height:12px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:5px; }
+  .phase.pending .dot { background:var(--line); }
+  .phase .stem { width:2px; flex:1; background:var(--line); margin-top:4px; }
+  .phase:last-child .stem { display:none; }
+  .phase .body { padding-bottom:22px; flex:1; }
+  .phase h3 { font-size:15.5px; margin:0 0 2px; font-weight:650; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .phase .when { font-size:12px; color:var(--faint); margin-bottom:8px; }
+  .phase ul { margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .phase li { margin-bottom:3px; }
+  .chip {
+    font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    border-radius:999px; padding:3px 9px;
+  }
+  .chip.now { background:var(--amber-soft); color:var(--amber); }
+  .chip.done { background:var(--green-soft); color:var(--green); }
+  .chip.next { background:var(--bg); color:var(--faint); border:1px solid var(--line); }
+  .chip.hold { background:var(--amber-soft); color:var(--amber); border:1px dashed var(--amber); }
+
+  .modules-head { display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .prog { flex:1; min-width:200px; }
+  .prog .track { height:8px; border-radius:4px; background:var(--line); overflow:hidden; }
+  .prog .fill { height:100%; border-radius:4px; background:var(--accent); transition:width .4s ease; }
+  @media (prefers-reduced-motion: reduce){ .prog .fill { transition:none; } }
+  .prog .cap { font-size:12px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+  .hdr-right { display:flex; align-items:center; gap:18px; }
+  .ring { position:relative; width:64px; height:64px; flex-shrink:0; }
+  .ring svg { transform:rotate(-90deg); width:64px; height:64px; display:block; }
+  .ring circle { fill:none; stroke-width:6; }
+  .ring .trackc { stroke:var(--line); }
+  .ring .fillc { stroke:var(--accent); stroke-linecap:round; transition:stroke-dashoffset .4s ease; }
+  @media (prefers-reduced-motion: reduce){ .ring .fillc { transition:none; } }
+  .ring .pct { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+  .ring .cnt { font-size:8.5px; color:var(--faint); font-weight:600; margin-top:2px; font-variant-numeric:tabular-nums; }
+
+  .mod-group { margin-bottom:26px; }
+  .mod-group h3 { font-size:14px; margin:0 0 4px; font-weight:650; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .mod-group .note { font-size:12.5px; color:var(--faint); font-weight:400; margin:0 0 10px; }
+  .badge { font-size:10px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; border-radius:999px; padding:2.5px 8px; }
+  .badge.req { background:var(--accent-soft); color:var(--accent); }
+  .badge.opt { background:var(--bg); color:var(--faint); border:1px solid var(--line); }
+  .mod-sub { font-size:11px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--faint); margin:14px 0 6px; }
+  details.modd { background:var(--surface); border:1px solid var(--line); border-radius:10px; margin-bottom:8px; }
+  details.modd.done { border-color:var(--accent); background:var(--accent-soft); }
+  details.modd summary { display:flex; align-items:center; gap:13px; padding:12px 15px; cursor:pointer; list-style:none; }
+  details.modd summary::-webkit-details-marker { display:none; }
+  details.modd summary .t { flex:1; font-size:14px; font-weight:650; }
+  details.modd summary .chev { color:var(--faint); font-size:12px; transition:transform .15s ease; flex-shrink:0; }
+  details.modd[open] summary .chev { transform:rotate(90deg); }
+  details.modd .steps { margin:0; padding:2px 16px 14px 48px; font-size:13.5px; color:var(--muted); display:flex; flex-direction:column; gap:6px; }
+  @media (prefers-reduced-motion: reduce){ details.modd summary .chev { transition:none; } }
+  .mod {
+    display:flex; align-items:center; gap:13px; background:var(--surface);
+    border:1px solid var(--line); border-radius:10px; padding:12px 15px; margin-bottom:8px;
+  }
+  .mod.done { border-color:var(--accent); background:var(--accent-soft); }
+  .chk {
+    width:20px; height:20px; border-radius:6px; border:2px solid var(--line); background:var(--surface);
+    cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:13px; color:var(--accent-ink); padding:0;
+  }
+  .mod.done .chk { background:var(--accent); border-color:var(--accent); }
+  .mod .t { flex:1; font-size:14px; font-weight:550; }
+  .mod a.watch { font-size:12.5px; font-weight:600; color:var(--accent); text-decoration:none; white-space:nowrap; }
+  .mod a.watch:hover { text-decoration:underline; }
+
+  .callout {
+    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent);
+    border-radius:0 10px 10px 0; padding:14px 18px; font-size:14px; color:var(--muted); margin-top:16px;
+  }
+  .callout strong { color:var(--ink); }
+  .callout.hold { border-left-color:var(--amber); }
+
+  .live-call {
+    display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+    background:linear-gradient(120deg, #6E2547 0%, #8A2E5C 55%, #5B4BC4 100%);
+    border-radius:14px; padding:22px 24px; margin-bottom:24px; color:#FFFFFF;
+    box-shadow:0 8px 28px rgba(110,37,71,.25);
+  }
+  .live-call .lc-left { flex:1; min-width:240px; }
+  .lc-badge {
+    display:inline-flex; align-items:center; gap:7px; font-size:10.5px; font-weight:800;
+    letter-spacing:.13em; text-transform:uppercase; background:#FFC94D; color:#2A1F00;
+    border-radius:999px; padding:4px 11px; margin-bottom:10px;
+  }
+  .lc-badge::before { content:""; width:7px; height:7px; border-radius:50%; background:#D62F2F; }
+  .live-call h3 { margin:0 0 6px; font-size:19px; font-weight:650; color:#FFFFFF; }
+  .live-call p { margin:0; font-size:13.5px; color:rgba(255,255,255,.85); max-width:42em; }
+  .live-call .when { font-weight:700; color:#FFC94D; }
+  .lc-btn {
+    display:inline-block; font-size:14.5px; font-weight:700; text-decoration:none;
+    background:#FFFFFF; color:#6E2547; border-radius:10px; padding:13px 22px;
+    transition:transform .12s ease; flex-shrink:0;
+  }
+  .lc-btn:hover { transform:scale(1.03); }
+  .lc-btn:focus-visible { outline:3px solid #FFC94D; outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ .lc-btn { transition:none; } }
+
+  ul.clean { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+  ul.clean li { display:flex; gap:10px; font-size:14px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:11px 15px; }
+  ul.clean li::before { content:"-"; color:var(--accent); font-weight:700; flex-shrink:0; }
+
+  .note-card {
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; box-shadow:var(--shadow); margin-bottom:12px;
+  }
+  .note-card .nc-date { font-size:11.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+  .note-card h3 { font-size:15.5px; margin:0 0 8px; font-weight:650; }
+  .note-card p { font-size:13.5px; color:var(--muted); margin:0 0 8px; }
+  .note-card ul { margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .note-card li { margin-bottom:3px; }
+
+  footer { text-align:center; font-size:12px; color:var(--faint); line-height:1.7; margin-top:20px; }
+</style>
+
+<div class="testbar"><b>Test build - simulated - not ratified</b> - internal workflow test. The strategy call behind this dashboard is simulated. Not for client delivery, not for production.</div>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="brandline">A2B Solutions - Client Dashboard</p>
+      <h1 class="serif">Fit Set Go - 90-Day Strategy</h1>
+      <div class="sub">Elena McCarthy - LinkedIn DFY - Prepared September 2026</div>
+    </div>
+    <div class="hdr-right">
+      <div class="ring" role="img" aria-label="Overall setup progress" title="Setup progress">
+        <svg viewBox="0 0 64 64"><circle class="trackc" cx="32" cy="32" r="26"/><circle class="fillc" id="ovring" cx="32" cy="32" r="26"/></svg>
+        <div class="pct"><span id="ovpct">0%</span><span class="cnt" id="ovcnt"></span></div>
+      </div>
+      <div class="confirm-box">
+        <button class="btn" id="confirm">Confirm strategy - start the build</button>
+        <div class="confirm-note">Nothing goes live until you confirm.</div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sections" aria-label="Sections">
+    <a href="#onboarding">Onboarding</a>
+    <a href="#targets">Targets</a>
+    <a href="#makeorbreak">Make or Break</a>
+    <a href="#funnel">Funnel</a>
+    <a href="#offer">Offer</a>
+    <a href="#documents">Documents</a>
+    <a href="#linkedin">LinkedIn Optimisation</a>
+    <a href="#plan">90-Day Plan</a>
+    <a href="#modules">Your Modules</a>
+    <a href="#actions">Action Items</a>
+    <a href="#callnotes">Call Notes</a>
+  </nav>
+
+  <section id="onboarding">
+    <h2>Onboarding - Get Set Up</h2>
+    <div id="obgroups"></div>
+  </section>
+
+  <section id="targets">
+    <h2>KPI Targets</h2>
+    <div class="tiles">
+      <div class="tile"><div class="v">3-5</div><div class="l">Booked calls / week once spend scales</div></div>
+      <div class="tile"><div class="v">50%+</div><div class="l">Close rate target - referrals already close near 100%</div></div>
+      <div class="tile"><div class="v">1-5 min</div><div class="l">Speed to lead - the single biggest lever</div></div>
+      <div class="tile"><div class="v">&euro;1,200</div><div class="l">Starting monthly ad spend, reinvest first sales</div></div>
+      <div class="tile"><div class="v">&euro;20-60</div><div class="l">Lead cost, females on LinkedIn</div></div>
+      <div class="tile"><div class="v">&euro;500-1k</div><div class="l">Expected CPA - one &euro;4,000 client covers it 4-8x</div></div>
+      <div class="tile"><div class="v">70%+</div><div class="l">Show rate with the thank-you page mechanics</div></div>
+      <div class="tile"><div class="v">&euro;10k</div><div class="l">Monthly revenue goal - your number from the call</div></div>
+    </div>
+    <div class="callout"><strong>Worst case maths, so there are no surprises:</strong> at &euro;1,200/month and &euro;60 leads, that's 20 leads in month one. 2 in 10 leads book a call, so that's 4 booked calls. Close half of those and that's &euro;8,000 collected against &euro;1,200 spent. That's the floor, not the plan. Lead costs come down and booking rates go up as the ads optimise, and every extra call is pure upside from there.</div>
+  </section>
+
+  <section id="makeorbreak">
+    <h2>Make or Break</h2>
+    <div class="cards">
+      <div class="card"><span class="tag">Offer</span><h3>Built for the avatar, not a Meta lead</h3><p>One offer per call - Premium Online Coaching at your documented pricing, positioned around the live form and intensity audits nobody else in her feed offers.</p></div>
+      <div class="card"><span class="tag">Speed</span><h3>Dial inside 1-5 minutes</h3><p>Speed to lead is the difference between success and failure. GHL fires instant alerts, the WhatsApp goes out inside 2 minutes, you dial inside 5. Conversion drops about 80% after 30 minutes.</p></div>
+      <div class="card"><span class="tag">Sales</span><h3>Elena closes every call</h3><p>Two-part close - a short triage first, the main call for qualified leads. No setter until a 65%+ close rate is proven. Fathom on everything, objections into Slack, recordings to Gilbert.</p></div>
+      <div class="card"><span class="tag amber">Proof</span><h3>Verified before it's used</h3><p>Your testimonial videos are being filmed and the before and afters are coming from Dropbox. Nothing goes on a public page until each asset is checked and verified. Missing proof gets named, never invented.</p></div>
+    </div>
+  </section>
+
+  <section id="funnel">
+    <h2>Funnel - Positioning Matrix</h2>
+    <div class="cards">
+      <div class="card"><span class="tag">TOF - Problem Aware</span><h3>The female putting the effort in blind</h3><p>Females 30-60. "I show up to every class. I put in more effort than anyone I know. So why does my body look like I've never trained a day?" Graphics-led ads, premium and calm, one promise per ad.</p></div>
+      <div class="card"><span class="tag">MOF - Solution Aware</span><h3>The Eyes-On Method <span class="chip hold">Name pending approval</span></h3><p>Strength, nutrition and mobility with live form and intensity audits twice a month - a coach who actually watches. Named everywhere, taught nowhere. WhatsApp inside 2 minutes, VSL runs 3-5 minutes.</p></div>
+      <div class="card"><span class="tag">BOF - Product Aware</span><h3>The deck creates the problem</h3><p>Body-fat silhouettes, the "which one are you" reveal, then the effects slide. Built after your first few real calls so real objections shape it. The VSL runs evergreen once live.</p></div>
+    </div>
+    <div class="callout"><strong>Your funnel - preview builds are live:</strong> 3 angle pages, each a separate ad destination, all landing on one booking page. <a href="vsl-longevity.html" target="_blank" style="color:var(--accent)">Longevity &#8599;</a> - <a href="vsl-traveller.html" target="_blank" style="color:var(--accent)">Traveller &#8599;</a> - <a href="vsl-boardroom.html" target="_blank" style="color:var(--accent)">Boardroom &#8599;</a> - <a href="vsl-book.html" target="_blank" style="color:var(--accent)">Booking &#8599;</a> - <a href="vsl-thank-you.html" target="_blank" style="color:var(--accent)">Thank-you &#8599;</a>. Your VSL video, verified testimonials and the live calendar drop in during the build.</div>
+    <div class="callout"><strong>What we do NOT say:</strong> no dress-size promises, no "drop a size in 8 weeks", no magic-pitch language, no timeframe beyond 90 days, no city-anchored headlines. The industry sells her another plan - we sell her a coach who actually watches.</div>
+  </section>
+
+  <section id="offer">
+    <h2>The Offer</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Tier</th><th>Price</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Premium Online Coaching - the core offer</td><td class="num">&euro;4,000</td><td>The push on every call. Presented alone, full payment first.</td></tr>
+          <tr><td>Premium Online Coaching - the longer option</td><td class="num">&euro;7,000</td><td>The anchor above the core.<span class="small">Full programme terms live in Your Offer below.</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout"><strong>Why push full payment first:</strong> cash collected is oxygen in the business. Expect roughly 40% to pay in full. For clients in Europe or the Middle East you already offer split payments via Klarna - that stays exactly as you run it, and it never opens the conversation. Everything runs in EUR, it's what you already charge in. Your pricing is unchanged in this plan - and once your close rate proves out, we review the price together.</div>
+  </section>
+
+  <section id="documents">
+    <h2>Your Documents</h2>
+    <div class="cards">
+      <a class="card" href="your-strategy.html" target="_blank">
+        <span class="tag">The full plan</span>
+        <h3>Your Strategy</h3>
+        <p>The full 90-day strategy - positioning, funnel, offer, sales system and the phased plan. Read it start to finish once, then use this dashboard day to day.</p>
+        <span class="open-cue">Open your strategy &#8599;</span>
+      </a>
+      <a class="card" href="your-offer.html" target="_blank">
+        <span class="tag">Read + comment</span>
+        <h3>Your Offer</h3>
+        <p>The offer written up - the one liner, what's included, why she buys, your pricing and the rules that protect your cash flow. Tell us anything that doesn't sound like you.</p>
+        <span class="open-cue">Open your offer &#8599;</span>
+      </a>
+      <a class="card" href="your-vsl-script.html" target="_blank">
+        <span class="tag">Rehearse + film</span>
+        <h3>Your VSL Script</h3>
+        <p>Headlines, the 3 hooks and the full main body, broken into beats for filming. Rehearse it out loud first - it's written in your voice, calm and explaining, no sales persona.</p>
+        <span class="open-cue">Open your VSL script &#8599;</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="linkedin">
+    <h2>LinkedIn Optimisation Setup</h2>
+    <div id="ligroups"></div>
+    <div class="callout"><strong>Why this matters:</strong> the profile is the landing page for every lead who checks you out. When a female sees your ad, she checks the profile before she books - recommendations are Google reviews for LinkedIn and she reads them.</div>
+  </section>
+
+  <section id="plan">
+    <h2>90-Day Plan</h2>
+    <div class="phase">
+      <div class="rail"><div class="dot"></div><div class="stem"></div></div>
+      <div class="body">
+        <h3>Phase 1 - Foundation <span class="chip now">In progress</span></h3>
+        <div class="when">Weeks 1-2</div>
+        <ul>
+          <li>Strategy confirmed in Slack - A2B builds the funnel pages, ads, triage script and GHL automations</li>
+          <li>Offer locked and the method name signed off by Alex</li>
+          <li>LinkedIn personal profile and the FitSetGo by Elena page optimised, grand opening post live</li>
+          <li>VSL scripts finalised, Elena films in beats off the script</li>
+          <li>Proof verified - testimonial videos checked, before and afters confirmed usable</li>
+          <li>GHL automations, calendar, WhatsApp alerts and lead sheet live</li>
+          <li>Go live (48hr turnaround from the VSL landing)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase pending">
+      <div class="rail"><div class="dot"></div><div class="stem"></div></div>
+      <div class="body">
+        <h3>Phase 2 - Warm the pipeline <span class="chip next">Up next</span></h3>
+        <div class="when">Weeks 2-8</div>
+        <ul>
+          <li>Ads optimisation weekly - kill underperformers, test a new angle each week, scale spend behind the winner</li>
+          <li>Pitch deck built and refined off your first real calls - the deck sharpens as objections surface</li>
+          <li>Weekly call review through Fathom and Slack</li>
+        </ul>
+      </div>
+    </div>
+    <div class="phase pending">
+      <div class="rail"><div class="dot"></div><div class="stem"></div></div>
+      <div class="body">
+        <h3>Phase 3 - Automate &amp; scale <span class="chip next">Later</span></h3>
+        <div class="when">Weeks 9-12</div>
+        <ul>
+          <li>Price review with Alex once the close rate proves out</li>
+          <li>Assess whether a setter makes sense yet - only on proven numbers and real call volume</li>
+          <li>Lock the daily tracking rhythm as standard operating procedure</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <h2>Your Modules</h2>
+    <div class="modules-head">
+      <div class="prog">
+        <div class="track"><div class="fill" id="progfill" style="width:0%"></div></div>
+        <div class="cap" id="progcap">0 modules complete</div>
+      </div>
+    </div>
+
+    <div class="live-call">
+      <div class="lc-left">
+        <span class="lc-badge">Live - LinkedIn clients</span>
+        <h3 class="serif">Group Sales Call with the A2B team</h3>
+        <p><span class="when">Every second Thursday - 4:00 PM UK, 5:00 PM Vienna</span> - bring the objections you fumbled that fortnight and we drill them live.</p>
+      </div>
+      <a class="lc-btn" href="https://us02web.zoom.us/j/89272547385?pwd=N0poU3JoWS94U1JXQkhXWHg3b0huZz09" target="_blank" rel="noopener">Join on Zoom &#8599;</a>
+    </div>
+
+    <div class="callout" style="margin:0 0 20px; border-left-color:var(--amber)"><strong>Your login was sent automatically</strong> - to the same email address you use for Slack. Can't find it? Search <strong>"A2B"</strong> in your inbox <em>and spam folder</em> for your username and password, then the Open &#8599; links below take you straight to the videos.</div>
+    <div id="modgroups"></div>
+  </section>
+
+  <section id="actions">
+    <h2>What A2B Is Building For You</h2>
+    <div class="mod-group" style="margin-bottom:34px">
+      <p class="note">Live within 7 days of your sign-off. Statuses update weekly.</p>
+      <div class="mod"><span class="t">90-day strategy - live on this dashboard</span><span class="chip done">Done</span></div>
+      <div class="mod"><span class="t">VSL script - headlines, 3 hooks, main body and the 3 page intros, live in Your Documents</span><span class="chip done">Done</span></div>
+      <div class="mod"><span class="t">Method name - proposed, with Alex for sign-off</span><span class="chip hold">Pending approval</span></div>
+      <div class="mod"><span class="t">Funnel preview pages - 3 angles + booking + thank-you, linked in the Funnel section above</span><span class="chip done">Done</span></div>
+      <div class="mod"><span class="t">Proof verification - your testimonial videos and before and afters, checked one by one as they land</span><span class="chip now">Waiting on assets</span></div>
+      <div class="mod"><span class="t">Strategy pack: triage script, sales course access, pitch deck, 13-ways</span><span class="chip next">Queued</span></div>
+      <div class="mod"><span class="t">Graphics ads + 3-field lead form</span><span class="chip next">Queued</span></div>
+      <div class="mod"><span class="t">GHL automations: instant lead alerts, WhatsApp-in-2-minutes, booking flow, lead sheet</span><span class="chip next">Queued</span></div>
+      <div class="mod"><span class="t">Tracking sheet with instructions from Angelo - lands before campaigns go live</span><span class="chip next">Queued</span></div>
+      <div class="mod"><span class="t">Pitch deck (silhouette sequence) - built off your first real calls</span><span class="chip next">Queued</span></div>
+    </div>
+
+    <h2>Your Action Items</h2>
+    <ul class="clean">
+      <li>Confirm strategy in Slack (button top right) - nothing is built until you do</li>
+      <li>Fill out the intake form - still outstanding from onboarding, link in the Onboarding section above</li>
+      <li>Finish filming the testimonial videos with your clients and drop them in the Drive folder</li>
+      <li>Dig out the before and afters from Dropbox and add them to the Drive</li>
+      <li>Send 5-10 LinkedIn recommendation requests this week</li>
+      <li>Install <a href="https://fathom.video" target="_blank" rel="noopener" style="color:var(--accent)">Fathom &#8599;</a> - it goes on every sales call</li>
+      <li>Finish the High Ticket Sales course before leads flow - it's in Your Modules above</li>
+      <li>Attend the <strong>Group Sales Call</strong> - every second Thursday, 4:00 PM UK, 5:00 PM Vienna - <a href="https://us02web.zoom.us/j/89272547385?pwd=N0poU3JoWS94U1JXQkhXWHg3b0huZz09" target="_blank" rel="noopener" style="color:var(--accent)">Join on Zoom &#8599;</a> - add it to your calendar now</li>
+    </ul>
+  </section>
+
+  <section id="callnotes">
+    <h2>Call Notes</h2>
+    <div class="note-card">
+      <div class="nc-date">10 September 2026 - Strategy session (simulated - test build, not ratified)</div>
+      <h3>Build direction set from your submitted forms and sales call</h3>
+      <p>This is a workflow test - the strategy call behind it is simulated and nothing here is ratified. What the test build locked in from your real sources:</p>
+      <ul>
+        <li>Avatar: females 30-60 from your positioning form - fat loss, shape, confidence and energy</li>
+        <li>Offer and pricing exactly as you documented them: &euro;4,000 and &euro;7,000 tiers, Klarna splits for Europe and Middle East clients, nothing new invented</li>
+        <li>Everything market-facing advertises 90 days - programme length is framed on your calls</li>
+        <li>Method name proposed and awaiting Alex's sign-off before it appears on anything live</li>
+        <li>Proof route: your testimonial videos and before and afters, used only after each is verified. No guarantee in any copy - none exists and none gets invented</li>
+        <li><strong>Your actions:</strong> confirm in Slack, intake form, testimonial videos, before and afters, recommendations push, Fathom, sales course</li>
+        <li><strong>Our actions:</strong> full strategy (this dashboard), 3-angle funnel, ads, GHL automations, VSL script</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    A2B Solutions - Strategy Dashboard - September 2026 - Test build, simulated, not ratified
+  </footer>
+</div>
+
+<script>
+// Course links resolve from system/course-links.json (dfy-linkedin -> dfy-core). Do not hand-edit URLs.
+const COURSE_ROOT = "https://course.a2b-solutions.online/courses/products/edae5685-a07f-47de-b03e-a3a77d23983f/categories";
+const CAT = {
+  onboarding: "2524a577-b6e1-4b6e-a4f2-75a8d552aa5c",
+  ghl: "7b321d3e-b302-42cb-913c-d4227c2ae7dd",
+  story: "0e1f37b3-0170-4aa3-8ebf-0d0f11a33951",
+  sales: "a723ac83-8cc0-490b-b7c6-9f4d8b0df8f8",
+};
+const L = (cat, post) => `${COURSE_ROOT}/${cat}/posts/${post}`;
+
+const GROUPS = [
+  {
+    title: "Filming Your VSL - Recording Standards",
+    badge: "req",
+    note: "The script is 80% - this is the 20% that makes her trust you in the first ten seconds. All doable on your phone.",
+    items: [
+      { h:"Reference library - see what good looks like" },
+      { id:"vf1a", t:"Watch: Elisha Forde Fitness - live VSL page, exactly as leads see it", url:"https://elishafordefitness.online/vsl-may" },
+      { id:"vf1b", t:"Watch: The Body Project - live VSL page", url:"https://thebodyproject.online/vsl-may" },
+      { id:"vf1e", t:"Watch: Rok Your Body - delivery, energy, background changes", url:"https://www.rokyourbody.online/vsl-meta" },
+      { id:"vf1d", t:"See YOUR funnel pages - where your VSL sits", steps:[
+        '<a href="vsl-longevity.html" target="_blank" style="color:var(--accent);font-weight:600">Longevity page &#8599;</a> - the strong-for-life angle',
+        '<a href="vsl-traveller.html" target="_blank" style="color:var(--accent);font-weight:600">Traveller page &#8599;</a> - the plan-that-bends angle',
+        '<a href="vsl-boardroom.html" target="_blank" style="color:var(--accent);font-weight:600">Boardroom page &#8599;</a> - the energy-and-confidence angle',
+        '<a href="vsl-book.html" target="_blank" style="color:var(--accent);font-weight:600">Booking page &#8599;</a> and <a href="vsl-thank-you.html" target="_blank" style="color:var(--accent);font-weight:600">Thank-you page &#8599;</a> - where every lead lands after the video',
+        'Your video, verified testimonials and live calendar drop in during the build',
+      ]},
+      { h:"The shoot - six steps" },
+      { id:"vf2", t:"1 - Camera Setup", steps:[
+        "Use your phone's REAR camera at the highest resolution (4K if available)",
+        "Landscape orientation, lens at eye level - tripod or a stack of books, never filming upward from a desk",
+        "Stand if possible, frame from the chest up with a little headroom",
+        "Tap-and-hold on your face to lock focus and exposure before recording",
+      ]},
+      { id:"vf3", t:"2 - Lighting & Audio", steps:[
+        "Face a window - daylight on your face, never behind you (a basic softbox works too)",
+        "Quiet room, door closed - soft furnishings kill echo",
+        "Lav mic if you have one, otherwise keep the phone under 1 metre",
+        "Record 10 seconds, play it back with headphones - THEN film",
+      ]},
+      { id:"vf4", t:"3 - Wardrobe & Set", steps:[
+        "Premium casual, coaching context - what you'd wear to meet a client for coffee",
+        "Background clean and premium with some depth - nothing gym-branded in frame",
+        "Nothing distracting in frame - no clutter",
+      ]},
+      { id:"vf5", t:"4 - Shoot in Beats", steps:[
+        "Your script is broken into labelled beats - record ONE beat per take",
+        "2-3 takes per beat, then move on - the editor joins them",
+        "Never one long read-through - that's how a 4-minute VSL gets filmed in an hour without a teleprompter stare",
+        "If you use a teleprompter app: text at the top near the lens, rehearse each beat once so you're recalling, not reading",
+      ]},
+      { id:"vf6", t:"5 - Delivery", steps:[
+        "Talk to ONE person across a table - the explaining voice you already use with clients",
+        "Hands visible and moving - gesture like a real conversation",
+        "Bring 20% more energy than feels natural - the camera eats energy",
+        "Slow down 20% on the key lines (the promise, the method, the ask) - smile at the open and close",
+      ]},
+      { id:"vf7", t:"6 - Variety & B-Roll", steps:[
+        "Two setups or angles minimum - change every 45-60 seconds of finished video",
+        "Second phone recording wide at 45 degrees counts as a second angle",
+        "Film the B-roll list: 5+ clips, 10-15 seconds each - coaching on a call, training, the swim background",
+        "Proof visuals get inserted by the editor once each asset is verified",
+      ]},
+    ],
+  },
+  {
+    title: "High Ticket Sales",
+    badge: "req",
+    courseUrl: `${COURSE_ROOT}/${CAT.sales}`,
+    note: "Finish this before leads flow - the triage script and pitch structure live here.",
+    items: [
+      { id:"hs1", t:"High Ticket Mindset", url:L(CAT.sales,"f873964a-142f-4272-adf7-f906d2c090c2") },
+      { id:"hs2", t:"High Ticket Pre-Qual Walkthrough", url:L(CAT.sales,"bca51e9e-92dd-4a7f-9e82-8c56fd2c6dda") },
+      { id:"hs3", t:"Consult Questionnaire (Sales Script)", url:L(CAT.sales,"8188a921-cdf8-47bd-878b-b42172507fe4") },
+      { id:"hs4", t:"Sales Ticket Pitch Deck", url:L(CAT.sales,"ca9f942f-a329-4f20-b2e1-6edfb63ec7c0") },
+      { id:"hs5", t:"Double Edged Downsell", url:L(CAT.sales,"e389000e-4027-4249-94d3-1d5fe1233900") },
+      { id:"hs6", t:"Call Breakdown | Omar [Call 1]", url:L(CAT.sales,"beb05687-5f51-47d3-936a-e51b029b582a") },
+      { id:"hs7", t:"Call Breakdown | Omar [Call 2]", url:L(CAT.sales,"b0fbde2a-2e4a-449f-b708-75119f27b7da") },
+      { id:"hs8", t:"Call Breakdown | Faris | Call 1", url:L(CAT.sales,"40cfcde1-18bb-437d-af0e-b291d3cd5478") },
+    ],
+  },
+  {
+    title: "GHL - How Go High Level Works",
+    badge: "req",
+    courseUrl: `${COURSE_ROOT}/${CAT.ghl}`,
+    note: "Practical how-tos - work through these as you need them, they don't block launch.",
+    items: [
+      { id:"gh1", t:"Navigate to Contacts to Find Leads", url:L(CAT.ghl,"54e0bc66-718f-4f5b-b256-2b53b0d7eeb8") },
+      { id:"gh2", t:"Set Up Your Opportunity Pipeline", url:L(CAT.ghl,"c0bb562d-c830-4520-a483-229980745e9f") },
+      { id:"gh3", t:"Connect Stripe to Your GHL", url:L(CAT.ghl,"9f459358-d513-4d9a-8682-cd4c2be0875d") },
+      { id:"gh4", t:"Get the GHL App on Your Phone", url:L(CAT.ghl,"1036e477-badb-4883-90c6-7f3a1da756ce") },
+      { id:"gh5", t:"Tag Clients on Go High Level", url:L(CAT.ghl,"a79230fb-5477-427e-9338-e2902757e01c") },
+      { id:"gh6", t:"Build Out Your Dashboard Effectively", url:L(CAT.ghl,"7cc8c5b6-b5be-462b-9094-6ffb7a58cb89") },
+      { id:"gh7", t:"Configure Your Calendar in GHL", url:L(CAT.ghl,"942a8e3b-8400-41ea-ba4f-45a4e95ebd2a") },
+      { id:"gh8", t:"Connect Your Email & Notifications", url:L(CAT.ghl,"e0694fae-b8a4-4e13-a9e6-992322b5c1de") },
+    ],
+  },
+  {
+    title: "Optional - Storytelling",
+    badge: "opt",
+    courseUrl: `${COURSE_ROOT}/${CAT.story}`,
+    note: "Completely optional - the ads run either way. But if you'd like to post on LinkedIn, this will help you write content that actually sounds like you.",
+    items: [
+      { id:"st1", t:"Founder-Led Storytelling Introduction", url:L(CAT.story,"7ab4bf3d-dc3e-4562-8429-05e5686af7d0") },
+      { id:"st2", t:"Harnessing the Power of Storytelling in Marketing", url:L(CAT.story,"02993dbf-0601-4479-84eb-5a0d1b6c0f78") },
+      { id:"st3", t:"Framework 1: Hook, Story, Offer", url:L(CAT.story,"a764b7a2-7800-47f2-8e02-bd15bd6366db") },
+      { id:"st4", t:"Framework 2: Story, Lesson, Offer", url:L(CAT.story,"ea3cd395-fa08-49c2-8955-c72f31d18a45") },
+      { id:"st5", t:"Framework 3: The HERO's Journey", url:L(CAT.story,"62daaccb-141d-4749-9591-29747b765e9e") },
+      { id:"st6", t:"Knowing Exactly Who You Are Targeting", url:L(CAT.story,"0d03149b-3fdd-4f3c-b323-6610afdb0038") },
+      { id:"st7", t:"Live Avatar Analysis - Fixing a Real Client's", url:L(CAT.story,"88f1e520-38ca-4b6c-a95e-f90c427cbde3") },
+      { id:"st8", t:"Putting It Together + Building the Claude AI Project", url:L(CAT.story,"153b7b43-a283-4971-830a-21b8e812a398") },
+      { id:"st9", t:"Turning Lifestyle Stories into Content That Resonates", url:L(CAT.story,"55a483e0-5992-486a-9839-1e32090db8c9") },
+    ],
+  },
+];
+
+const OB_GROUPS = [
+  {
+    title: "Your Setup Steps",
+    badge: "req",
+    note: "Once these are done, message the team in Slack and the build starts.",
+    items: [
+      { id:"ob_wp", t:"Read the welcome pack (sent to your email - tell us if it's missing)" },
+      { id:"ob_if", t:"Fill out the intake form - still outstanding", url:"https://api.leadconnectorhq.com/widget/survey/t0QzzlUp1h38TTHR6nlb" },
+      { id:"ob_dr", t:"Upload branding assets: photos, headshots, logos, before and afters, testimonial videos", url:"https://drive.google.com/drive/folders/1q0PLeiZsOm7rpi2Kz-3VKaYDtfVO3oRW" },
+      { id:"ob_pp", t:"Complete the Product Positioning Audit form", url:"https://api.leadconnectorhq.com/widget/form/BeEConUoE39WMVj8ASJX" },
+      { id:"ob_sl", t:"Confirm completion in your Slack channel" },
+    ],
+  },
+  {
+    title: "Onboarding Course",
+    badge: "req",
+    courseUrl: `${COURSE_ROOT}/${CAT.onboarding}`,
+    note: "Start here. Everything you need in your first 7-10 days.",
+    items: [
+      { id:"ob1", t:"Welcome to A2B!", url:L(CAT.onboarding,"2b7deadc-79c3-464c-96eb-c5ba7622aa34") },
+      { id:"ob2", t:"Onboarding Checklist - START HERE", url:L(CAT.onboarding,"c722a4c6-b91c-441c-86e0-f1bc842c2c3b") },
+      { id:"ob3", t:"Mastering the Mindset for Business Success", url:L(CAT.onboarding,"27760149-dfb5-4b2e-9c9c-67e3f0ef9b82") },
+      { id:"ob4", t:"Essential House Rules for Communication & Collaboration", url:L(CAT.onboarding,"5a1ba405-3e95-4f37-b83c-0e82209aafa9") },
+      { id:"ob5", t:"Step-by-step Guide on Sharing Access to A2B", url:L(CAT.onboarding,"e92db1b6-8ee1-4402-8603-14d8ec88c4ef") },
+      { id:"ob6", t:"Mastering Your Product Position & Audit Strategy", url:L(CAT.onboarding,"24ac558c-4da9-4f2d-92ed-3c04b49a6203") },
+      { id:"ob7", t:"Mastering the KISS Method: Your Path to Six Figures", url:L(CAT.onboarding,"2db78097-e747-4378-8241-5759bbba3665") },
+      { id:"ob8", t:"What to Expect in Your First 7-10 Days", url:L(CAT.onboarding,"6ffcf723-eaa8-433d-8b9d-5faa6f3ee48a") },
+      { id:"ob9", t:"Weekly Check-In Process and Why It Matters", url:L(CAT.onboarding,"34d92e98-3c9a-419f-80e1-10c113021390") },
+      { id:"ob10", t:"The Importance of Professional Branding for Coaches", url:L(CAT.onboarding,"c77f38e3-f2d3-4db8-a4de-abc2d378de67") },
+    ],
+  },
+  {
+    title: "Your Weekly Rhythm",
+    badge: "req",
+    note: "Ongoing, once ads are live. Data in, updates out. We don't guess, we track.",
+    items: [
+      { id:"ob_tr", t:"Fill out your daily KPI sheet - Angelo sends the tracking sheet with instructions before campaigns go live. Booked calls, shows, closes, cash collected, CPA. Takes 2 minutes a day." },
+      { id:"ob_ci", t:"Complete the weekly check-in form - provided in Slack each week. This powers your weekly update from the team." },
+    ],
+  },
+];
+const OB_KEY = "em_ob_v1";
+let obDone = new Set(JSON.parse(localStorage.getItem(OB_KEY) || '["ob_pp","ob_wp"]'));
+
+function renderOnboard() {
+  document.getElementById("obgroups").innerHTML = OB_GROUPS.map(g => {
+    const ids = g.items.filter(m => m.id);
+    const gdone = ids.filter(m => obDone.has(m.id)).length;
+    return `
+    <div class="mod-group">
+      <h3>${g.title} <span class="badge ${g.badge}">Required</span>${g.courseUrl ? ` <a class="watch" href="${g.courseUrl}" target="_blank" rel="noopener">Open course &#8599;</a>` : ""}</h3>
+      <p class="note">${g.note} - ${gdone}/${ids.length} done</p>
+      ${g.items.map(m => m.h ? `<div class="mod-sub">${m.h}</div>` : `
+      <div class="mod ob ${obDone.has(m.id) ? "done" : ""}" data-id="${m.id}">
+        <button class="chk" aria-label="Mark ${m.t} ${obDone.has(m.id) ? "incomplete" : "complete"}" aria-pressed="${obDone.has(m.id)}">${obDone.has(m.id) ? "&#10003;" : ""}</button>
+        <span class="t">${m.t}</span>
+        ${m.url ? `<a class="watch" href="${m.url}" target="_blank" rel="noopener">Open &#8599;</a>` : ""}
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+}
+
+const LI_GROUPS = [
+  {
+    title: "Personal Profile",
+    badge: "req",
+    note: "Where the credibility check happens - the profile is the landing page for every lead who checks you out.",
+    items: [
+      { id:"lp1", t:"Headshot as the profile image, not a logo" },
+      { id:"lp2", t:"Banner states the RESULT - direction: \"Strength and Nutrition Coaching for Females Who Want to Look and Feel Strong\"" },
+      { id:"lp3", t:"Tagline: primary keyword + authority trigger + specific outcome, keyword in the first 40 characters" },
+      { id:"lp4", t:"Custom button pointed at the VSL page, not a homepage" },
+      { id:"lp5", t:"About section rewritten client-centric: pain-point hook, the swimmer-to-coach background, quantified client results once verified, CTA" },
+      { id:"lp6", t:"Featured sequence: best verified testimonial first, booking link, then the contrarian post later" },
+      { id:"lp7", t:"Recommendations push - 5-10 requests sent this week" },
+    ],
+  },
+  {
+    title: "Business Page (FitSetGo by Elena) - Ad-Readiness",
+    badge: "req",
+    note: "The page exists and access handover is under way. Goal: 100% ad-readiness and 300+ followers.",
+    items: [
+      { id:"lb1", t:"Grand opening post with the personal story" },
+      { id:"lb2", t:"All 20 Specialties filled - Online Coaching, Strength Training, Nutrition Coaching, Mobility and so on" },
+      { id:"lb3", t:"Hiring hack while the page is under 300 followers" },
+      { id:"lb4", t:"250 monthly invite credits calendared" },
+    ],
+  },
+];
+const LI_KEY = "em_li_v1";
+let liDone = new Set(JSON.parse(localStorage.getItem(LI_KEY) || "[]"));
+
+function renderLinkedIn() {
+  document.getElementById("ligroups").innerHTML = LI_GROUPS.map(g => {
+    const gdone = g.items.filter(m => liDone.has(m.id)).length;
+    return `
+    <div class="mod-group">
+      <h3>${g.title} <span class="badge ${g.badge}">${g.badge === "req" ? "Required" : "Optional"}</span></h3>
+      <p class="note">${g.note} - ${gdone}/${g.items.length} done</p>
+      ${g.items.map(m => `
+      <div class="mod li ${liDone.has(m.id) ? "done" : ""}" data-id="${m.id}">
+        <button class="chk" aria-label="Mark ${m.t} ${liDone.has(m.id) ? "incomplete" : "complete"}" aria-pressed="${liDone.has(m.id)}">${liDone.has(m.id) ? "&#10003;" : ""}</button>
+        <span class="t">${m.t}</span>
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+}
+
+const KEY = "em_mods_v1";
+let done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+const allItems = GROUPS.flatMap(g => g.items.filter(m => m.id));
+
+function renderModules() {
+  document.getElementById("modgroups").innerHTML = GROUPS.map(g => {
+    const ids = g.items.filter(m => m.id);
+    const gdone = ids.filter(m => done.has(m.id)).length;
+    return `
+    <div class="mod-group">
+      <h3>${g.title} <span class="badge ${g.badge}">${g.badge === "req" ? "Required" : "Optional"}</span>${g.courseUrl ? ` <a class="watch" href="${g.courseUrl}" target="_blank" rel="noopener">Open course &#8599;</a>` : ""}</h3>
+      <p class="note">${g.note} - ${gdone}/${ids.length} done</p>
+      ${g.items.map(m => m.h ? `<div class="mod-sub">${m.h}</div>` : m.steps ? `
+      <details class="modd ${done.has(m.id) ? "done" : ""}" data-id="${m.id}">
+        <summary>
+          <button class="chk" aria-label="Mark ${m.t} ${done.has(m.id) ? "incomplete" : "complete"}" aria-pressed="${done.has(m.id)}">${done.has(m.id) ? "&#10003;" : ""}</button>
+          <span class="t">${m.t}</span>
+          <span class="chev">&#9654;</span>
+        </summary>
+        <div class="steps">${m.steps.map(s => `<div>- ${s}</div>`).join("")}</div>
+      </details>` : `
+      <div class="mod ${done.has(m.id) ? "done" : ""}" data-id="${m.id}">
+        <button class="chk" aria-label="Mark ${m.t} ${done.has(m.id) ? "incomplete" : "complete"}" aria-pressed="${done.has(m.id)}">${done.has(m.id) ? "&#10003;" : ""}</button>
+        <span class="t">${m.t}</span>
+        ${m.url ? `<a class="watch" href="${m.url}" target="_blank" rel="noopener">Open &#8599;</a>` : ""}
+      </div>`).join("")}
+    </div>`;
+  }).join("");
+  document.getElementById("progfill").style.width = (done.size / allItems.length * 100) + "%";
+  document.getElementById("progcap").textContent = `${done.size} of ${allItems.length} lessons complete`;
+}
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".chk"); if (!btn) return;
+  e.preventDefault();
+  const mod = btn.closest(".mod, details.modd");
+  const id = mod.dataset.id;
+  if (mod.classList.contains("ob")) {
+    obDone.has(id) ? obDone.delete(id) : obDone.add(id);
+    localStorage.setItem(OB_KEY, JSON.stringify([...obDone]));
+    renderOnboard();
+  } else if (mod.classList.contains("li")) {
+    liDone.has(id) ? liDone.delete(id) : liDone.add(id);
+    localStorage.setItem(LI_KEY, JSON.stringify([...liDone]));
+    renderLinkedIn();
+  } else {
+    done.has(id) ? done.delete(id) : done.add(id);
+    localStorage.setItem(KEY, JSON.stringify([...done]));
+    renderModules();
+  }
+});
+
+const cbtn = document.getElementById("confirm");
+if (localStorage.getItem("em_confirmed")) confirmUI();
+cbtn.addEventListener("click", () => {
+  localStorage.setItem("em_confirmed", "1");
+  confirmUI();
+});
+function confirmUI() {
+  cbtn.disabled = true;
+  cbtn.textContent = "✓ Strategy confirmed - build underway";
+}
+
+function updateOverall() {
+  const obTotal = OB_GROUPS.flatMap(g => g.items.filter(m => m.id)).length;
+  const liTotal = LI_GROUPS.flatMap(g => g.items).length;
+  const modTotal = allItems.length;
+  const total = obTotal + liTotal + modTotal + 1; // +1 = strategy confirmed
+  const doneCount = obDone.size + liDone.size + done.size + (localStorage.getItem("em_confirmed") ? 1 : 0);
+  const pct = Math.round(doneCount / total * 100);
+  const C = 2 * Math.PI * 26;
+  const ringEl = document.getElementById("ovring");
+  ringEl.style.strokeDasharray = C;
+  ringEl.style.strokeDashoffset = C * (1 - pct / 100);
+  document.getElementById("ovpct").textContent = pct + "%";
+  document.getElementById("ovcnt").textContent = doneCount + "/" + total;
+}
+
+const _ro = renderOnboard, _rm = renderModules, _rl = renderLinkedIn, _cu = confirmUI;
+renderOnboard = () => { _ro(); updateOverall(); };
+renderModules = () => { _rm(); updateOverall(); };
+renderLinkedIn = () => { _rl(); updateOverall(); };
+confirmUI = () => { _cu(); updateOverall(); };
+
+renderOnboard();
+renderModules();
+renderLinkedIn();
+updateOverall();
+</script>
