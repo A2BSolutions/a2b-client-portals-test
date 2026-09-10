@@ -1,0 +1,121 @@
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="a2b-test-build" content="true">
+<style>
+  :root { --bg:#160910; --bg2:#221019; --surface:#26131C; --ink:#FFFFFF; --muted:#C9AEBC;
+    --faint:#8A6C79; --line:#3C2430; --acc:#DE7FAC; --acc-bright:#F0A9CB; --acc-ink:#2A0D1C; }
+  * { box-sizing:border-box; }
+  body { margin:0; color:var(--ink); line-height:1.55;
+    background:radial-gradient(1100px 520px at 50% -80px, rgba(222,127,172,.13), transparent 60%), linear-gradient(180deg, var(--bg2) 0%, var(--bg) 40%);
+    background-color:var(--bg); background-repeat:no-repeat;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  .preview-bar { background:#2A0D1C; color:#F4D7E5; font-size:12px; padding:9px 16px;
+    display:flex; gap:8px; align-items:center; flex-wrap:wrap; border-bottom:1px solid #4A2438; }
+  .preview-bar b { letter-spacing:.08em; text-transform:uppercase; font-size:10.5px; }
+  .wrap { max-width:720px; margin:0 auto; padding:0 20px 70px; }
+  header.h { display:flex; justify-content:space-between; align-items:baseline; padding:22px 0 4px; }
+  .brand { font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+  .brand-tag { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+  .hero { text-align:center; padding:26px 0 6px; }
+  .pill { display:inline-flex; align-items:center; gap:8px; border:1px solid rgba(222,127,172,.55);
+    color:var(--acc-bright); border-radius:999px; padding:7px 18px; font-size:11.5px; font-weight:800;
+    letter-spacing:.2em; text-transform:uppercase; margin-bottom:22px; }
+  h1 { font-size:clamp(30px,6vw,44px); line-height:1.1; margin:0 auto 14px; font-weight:800;
+    letter-spacing:-.015em; text-wrap:balance; max-width:15em; }
+  h1 em { font-style:normal; color:var(--acc-bright); }
+  .sub { font-size:16.5px; color:var(--muted); max-width:33em; margin:0 auto 18px; }
+  .creds { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 20px; font-size:11px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin:0 0 28px; }
+  .vsl { position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; width:100%;
+    background:linear-gradient(140deg,#2C1420 0%,#361A28 100%); border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    box-shadow:0 0 0 1px rgba(222,127,172,.12), 0 24px 70px rgba(0,0,0,.55); margin-bottom:10px; }
+  .vsl .play { width:78px; height:78px; border-radius:50%; background:var(--acc); display:flex;
+    align-items:center; justify-content:center; box-shadow:0 0 40px rgba(222,127,172,.45); }
+  .vsl .play::after { content:""; border-style:solid; border-width:13px 0 13px 23px;
+    border-color:transparent transparent transparent var(--acc-ink); margin-left:6px; }
+  .vsl .cap { color:#F4D7E5; font-size:13.5px; }
+  .vsl-note { text-align:center; font-size:11.5px; color:var(--faint); margin-bottom:28px; }
+  .btn { display:block; width:100%; text-align:center; font:inherit; font-size:17.5px; font-weight:800;
+    background:var(--acc); color:var(--acc-ink); border:none; border-radius:12px;
+    padding:18px 28px; cursor:pointer; text-decoration:none; letter-spacing:.02em;
+    box-shadow:0 10px 34px rgba(222,127,172,.28); transition:transform .12s ease, filter .12s ease; }
+  .btn:hover { filter:brightness(1.06); transform:translateY(-1px); }
+  .reassure { text-align:center; font-size:13px; color:var(--faint); margin:13px 0 44px; }
+  h2.sec { font-size:24px; font-weight:800; margin:0 0 6px; text-align:center; letter-spacing:-.01em; }
+  h2.sec em { font-style:normal; color:var(--acc-bright); }
+  .secnote { text-align:center; font-size:13.5px; color:var(--muted); margin:0 0 20px; }
+  .cards3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; margin:0 0 44px; }
+  .c3 { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .c3 .k { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--acc-bright); margin-bottom:8px; }
+  .c3 h3 { margin:0 0 6px; font-size:16.5px; }
+  .c3 p { margin:0; font-size:13.5px; color:var(--muted); }
+  .steps { counter-reset:s; list-style:none; margin:16px 0 44px; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .steps li { counter-increment:s; display:flex; gap:14px; align-items:flex-start; font-size:15px;
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 17px; }
+  .steps li::before { content:counter(s); font-weight:800; color:var(--acc-ink); background:var(--acc);
+    width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .proofgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:0 0 8px; }
+  .pcard { background:var(--surface); border:1px dashed var(--line); border-radius:14px; aspect-ratio:4/5;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--faint); font-size:12.5px; text-align:center; padding:14px; }
+  .pcard .ic { width:44px; height:44px; border-radius:50%; border:2px solid var(--faint); display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .videonote { text-align:center; font-size:12.5px; color:var(--muted); margin:10px 0 44px; }
+  .ctaband { text-align:center; background:linear-gradient(120deg, rgba(222,127,172,.14), rgba(222,127,172,.04));
+    border:1px solid rgba(222,127,172,.3); border-radius:16px; padding:30px 24px; margin-bottom:36px; }
+  .ctaband h2 { margin:0 0 8px; font-size:22px; }
+  .ctaband p { margin:0 0 18px; color:var(--muted); font-size:14.5px; }
+  footer { text-align:center; font-size:12px; color:var(--faint); line-height:1.7; }
+  .calbox { background:var(--surface); border:1px dashed var(--line); border-radius:16px; min-height:420px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--faint);
+    font-size:13px; text-align:center; padding:20px; margin-bottom:26px; }
+</style><title>Fit Set Go | Boardroom</title>
+<div class="preview-bar"><b>Test build - simulated - not ratified</b><span>Workflow test preview, not live. Method name pending strategist approval. Proof slots unverified. Elena's video and booking calendar drop in during the build.</span></div>
+<div class="wrap">
+<header class="h"><span class="brand">Fit Set Go</span><span class="brand-tag">Coaching by Elena McCarthy</span></header>
+  <div class="hero">
+    <span class="pill">For the female who runs on empty by six</span>
+    <h1>The most switched-on woman in the room <em>isn't running on caffeine.</em></h1>
+    <p class="sub">Energy that lasts past 6pm comes from strength, food and recovery coached properly. It shows everywhere - not just the mirror.</p>
+    <div class="creds"><span>Former competitive swimmer</span><span>Strength &amp; nutrition coach</span><span>Mobility-first programming</span><span>Education-first coaching</span></div>
+  </div>
+  <div class="vsl"><div class="play"></div><div class="cap">Watch: the short breakdown</div></div>
+  <p class="vsl-note">Elena's video drops in here during the build.</p>
+
+  <a class="btn" href="vsl-book.html">Book your intro call</a>
+  <p class="reassure">No pitch. No pressure. A short intro call, your questions, and an honest answer on whether it fits you.</p>
+
+  <section>
+    <h2 class="sec">Coaching with <em>eyes on you</em></h2>
+    <p class="secnote">Most online coaches send a plan and wish you luck. This one watches.</p>
+    <div class="cards3">
+      <div class="c3"><div class="k">Watched</div><h3>Live form and intensity audits</h3><p>Twice a month Elena watches how you move and how hard you push, live, and corrects it there and then.</p></div>
+      <div class="c3"><div class="k">Taught</div><h3>You learn the why</h3><p>Nutrition and training you're taught, not handed. Once you understand it, the results are yours for life.</p></div>
+      <div class="c3"><div class="k">Built to bend</div><h3>Your week, not a PT's diary</h3><p>You know exactly what to do and you do it whenever it suits you. The plan survives real life.</p></div>
+      <div class="c3"><div class="k">Supported</div><h3>7-day message support</h3><p>A coach in your pocket for form checks, food questions and the weeks that wobble.</p></div>
+    </div>
+  </section>
+  <section>
+    <h2 class="sec">How it works</h2>
+    <ol class="steps">
+      <li>Elena builds your strength, nutrition and mobility programme around your goals, schedule and equipment.</li>
+      <li>You train on your own time. Twice a month she watches you do it, live, and fixes what a plan never could.</li>
+      <li>Weekly check-ins keep it honest - weight, measurements, sleep, energy - and the plan adjusts off real data.</li>
+    </ol>
+  </section>
+  <section>
+    <h2 class="sec">From the females <em>she coaches</em></h2>
+    <p class="secnote">Real clients, real words - added once each one is filmed and verified.</p>
+    <div class="proofgrid">
+      <div class="pcard"><div class="ic">&#10077;</div>Client video<br>slot 1</div>
+      <div class="pcard"><div class="ic">&#10077;</div>Client video<br>slot 2</div>
+      <div class="pcard"><div class="ic">in</div>LinkedIn recommendations<br>slot</div>
+    </div>
+    <p class="videonote">Client stories land here once they're filmed and verified. Nothing gets shown before that.</p>
+  </section>
+  <div class="ctaband">
+    <h2>A short call. No pitch. Straight answers.</h2>
+    <p>Elena watches every client train, live. Bring your questions and you'll get an honest answer on whether it fits.</p>
+    <a class="btn" href="vsl-book.html">Book your call with Elena</a>
+  </div>
+
+  <footer>Fit Set Go - Elena McCarthy, coaching from Vienna<br>Results vary by individual. Nothing on this page is medical advice.</footer>
+</div>
