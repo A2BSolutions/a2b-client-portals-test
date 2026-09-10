@@ -1,0 +1,64 @@
+name: Guard - test-only content
+
+# Fails any PR that tries to put content outside test-<slug>/ folders, or
+# adds/changes an HTML page without TEST markings. This repo hosts TEST
+# previews only; it must never be able to carry production-shaped content.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce test-only layout and markings
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD)
+          echo "Changed files:"; echo "$CHANGED"; echo ""
+          FAIL=0
+
+          # 1. Layout: root allowlist + test-*/ folders only
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              README.md|vercel.json|.vercelignore|index.html|.gitignore) continue ;;
+              .github/*) continue ;;
+              test-*/*) continue ;;
+              *)
+                echo "BLOCK: '$f' is outside test-*/ and not an allowed root file"
+                FAIL=1 ;;
+            esac
+          done <<< "$CHANGED"
+
+          # 2. Markings: every added/modified HTML page must be TEST-marked
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in *.html) ;; *) continue ;; esac
+            [ -f "$f" ] || continue   # deleted files pass
+            if ! grep -q '<meta name="a2b-test-build" content="true"' "$f"; then
+              echo "BLOCK: '$f' missing a2b-test-build meta tag"
+              FAIL=1
+            fi
+            if ! grep -qiE 'TEST BUILD|TEST MODE|SIMULATED|NOT RATIFIED|test-banner' "$f"; then
+              echo "BLOCK: '$f' has no visible TEST/SIMULATED/NOT RATIFIED marker"
+              FAIL=1
+            fi
+          done <<< "$CHANGED"
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo ""
+            echo "This repo is TEST-only. Production dashboards go through"
+            echo "promote-dashboard.sh into a2b-client-portals - never here."
+            exit 1
+          fi
+          echo "Guard passed: all content is test-*/ scoped and TEST-marked."

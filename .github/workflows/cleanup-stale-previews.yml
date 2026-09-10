@@ -1,0 +1,57 @@
+name: Cleanup - stale test previews
+
+# Weekly sweep. A test preview is disposable: once a test-preview/* PR or
+# branch has sat untouched for 14 days, it gets closed/deleted. Nothing here
+# touches main, other branches, or anything outside test-preview/*.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MAX_AGE_DAYS: "14"
+    steps:
+      - name: Close stale test-preview PRs and delete stale branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO="${{ github.repository }}"
+          CUTOFF=$(date -u -d "$MAX_AGE_DAYS days ago" +%s)
+
+          # 1. Close open PRs from test-preview/* branches idle past cutoff
+          gh pr list --repo "$REPO" --state open \
+            --json number,headRefName,updatedAt \
+            --jq '.[] | select(.headRefName | startswith("test-preview/")) | [.number, .headRefName, .updatedAt] | @tsv' \
+          | while IFS=$'\t' read -r num branch updated; do
+              TS=$(date -u -d "$updated" +%s)
+              if [ "$TS" -lt "$CUTOFF" ]; then
+                echo "Closing stale PR #$num ($branch, last updated $updated)"
+                gh pr close "$num" --repo "$REPO" \
+                  --comment "Auto-closed: this TEST preview sat untouched for over $MAX_AGE_DAYS days. Re-run the preview script for a fresh one." \
+                  --delete-branch || true
+              fi
+            done
+
+          # 2. Delete test-preview/* branches with no open PR, idle past cutoff
+          gh api "repos/$REPO/branches" --paginate \
+            --jq '.[] | select(.name | startswith("test-preview/")) | .name' \
+          | while IFS= read -r branch; do
+              OPEN=$(gh pr list --repo "$REPO" --state open --head "$branch" --json number --jq 'length')
+              [ "$OPEN" != "0" ] && continue
+              COMMIT_DATE=$(gh api "repos/$REPO/branches/$branch" --jq '.commit.commit.committer.date')
+              TS=$(date -u -d "$COMMIT_DATE" +%s)
+              if [ "$TS" -lt "$CUTOFF" ]; then
+                echo "Deleting stale branch $branch (last commit $COMMIT_DATE)"
+                gh api -X DELETE "repos/$REPO/git/refs/heads/$branch" || true
+              fi
+            done
+          echo "Sweep complete."
